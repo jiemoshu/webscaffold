@@ -1,0 +1,11 @@
+{
+  "aws_project_region": "us-east-1",
+  "API": {
+    "REST": {
+      "myApi": {
+        "endpoint": "https://your-api-id.execute-api.us-east-1.amazonaws.com/dev",
+        "region": "us-east-1"
+      }
+    }
+  }
+}

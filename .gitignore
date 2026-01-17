@@ -1,30 +1,35 @@
+# =============================================================================
+# MONOREPO ROOT
+# =============================================================================
+node_modules/
+.DS_Store
+*.pem
+.env
+.env.local
+.env*.local
+
+# =============================================================================
+# JAVASCRIPT/NODE
+# =============================================================================
 # dependencies
-/node_modules
 /.pnp
 .pnp.js
 
 # testing
-/coverage
+coverage/
 
-# next.js
-/.next/
-/out/
+# next.js (in web/)
+web/.next/
+web/out/
 
 # production
-/build
-
-# misc
-.DS_Store
-*.pem
+build/
+dist/
 
 # debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-# local env files
-.env*.local
-.env
 
 # vercel
 .vercel
@@ -33,7 +38,65 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# amplify
+# =============================================================================
+# PYTHON (services/kg-pipeline/)
+# =============================================================================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+develop-eggs/
+eggs/
+*.egg-info/
+*.egg
+MANIFEST
+wheels/
+pip-wheel-metadata/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+.poetry/
+
+# Poetry
+poetry.lock
+
+# PyInstaller
+*.manifest
+*.spec
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Ruff
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# PDFs in data folders (keep .gitkeep)
+services/kg-pipeline/data/inbox/*.pdf
+services/kg-pipeline/data/archive/*.pdf
+services/kg-pipeline/data/error/*.pdf
+services/kg-pipeline/data/error/logs.txt
+
+# =============================================================================
+# AWS AMPLIFY
+# =============================================================================
 amplify/\#current-cloud-backend
 amplify/.config/local-*
 amplify/logs
@@ -41,17 +104,29 @@ amplify/mock-data
 amplify/mock-api-resources
 amplify/backend/amplify-meta.json
 amplify/backend/.temp
-build/
-dist/
-node_modules/
 aws-exports.js
 awsconfiguration.json
-amplifyconfiguration.json
 amplifyconfiguration.dart
 amplify-build-config.json
 amplify-gradle-config.json
 amplifytools.xcconfig
 .secret-*
-**.sample
-\#amplify-do-not-edit-begin
-\#amplify-do-not-edit-end
+
+# Note: web/amplifyconfiguration.json is a placeholder and should be in git
+# The real one is generated during deployment
+
+# =============================================================================
+# IDE / EDITOR
+# =============================================================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# =============================================================================
+# OS
+# =============================================================================
+Thumbs.db
+ehthumbs.db
+Desktop.ini

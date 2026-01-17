@@ -1,0 +1,60 @@
+[tool.poetry]
+name = "kg-pipeline"
+version = "0.1.0"
+description = "Singapore Math Knowledge Graph Pipeline - CPA Approach"
+authors = ["Singapore Math Team"]
+readme = "README.md"
+packages = [{include = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+# LlamaIndex Core & Graph
+llama-index-core = "^0.11.0"
+llama-index-graph-stores-neo4j = "^0.3.0"
+llama-index-llms-openai = "^0.2.0"
+llama-index-embeddings-openai = "^0.2.0"
+# API & CLI
+fastapi = "^0.115.0"
+uvicorn = {extras = ["standard"], version = "^0.32.0"}
+typer = {extras = ["all"], version = "^0.12.0"}
+rich = "^13.9.0"
+# Data & Config
+pydantic = "^2.9.0"
+pydantic-settings = "^2.6.0"
+python-dotenv = "^1.0.1"
+# HTTP Client (for Mathpix)
+httpx = "^0.27.0"
+# PDF Processing fallback
+pypdf = "^5.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.0"
+pytest-asyncio = "^0.24.0"
+black = "^24.10.0"
+ruff = "^0.7.0"
+mypy = "^1.13.0"
+
+[tool.poetry.scripts]
+process-inbox = "src.cli:app"
+serve-api = "src.api:run_server"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 100
+target-version = ['py310']
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true

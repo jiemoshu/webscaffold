@@ -1,0 +1,43 @@
+{
+  "name": "singapore-math-web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@iconify/react": "^6.0.2",
+    "@react-three/drei": "^9.122.0",
+    "@react-three/fiber": "^8.18.0",
+    "@types/d3": "^7.4.3",
+    "aws-amplify": "^6.0.0",
+    "d3": "^7.9.0",
+    "framer-motion": "^12.23.26",
+    "iron-session": "^8.0.4",
+    "katex": "^0.16.27",
+    "konva": "^10.0.12",
+    "mathjs": "^15.1.0",
+    "nerdamer": "^1.1.13",
+    "next": "14.2.0",
+    "plotly.js": "^3.3.1",
+    "plotly.js-dist-min": "^3.3.1",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "react-konva": "^18.2.14",
+    "react-plotly.js": "^2.6.0",
+    "three": "^0.182.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/react-plotly.js": "^2.6.4",
+    "@types/three": "^0.182.0",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.0",
+    "typescript": "^5"
+  }
+}

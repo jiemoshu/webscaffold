@@ -1,25 +1,28 @@
 {
-  "name": "amplify-nextjs-lambda-template",
+  "name": "singapore-math-monorepo",
   "version": "0.1.0",
   "private": true,
+  "description": "Singapore Math platform with Knowledge Graph Pipeline",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "web:dev": "cd web && npm run dev",
+    "web:build": "cd web && npm run build",
+    "web:start": "cd web && npm run start",
+    "web:lint": "cd web && npm run lint",
+    "web:install": "cd web && npm install",
+    "kg:install": "cd services/kg-pipeline && poetry install",
+    "kg:ingest": "cd services/kg-pipeline && poetry run process-inbox process",
+    "kg:status": "cd services/kg-pipeline && poetry run process-inbox status",
+    "kg:query": "cd services/kg-pipeline && poetry run process-inbox query",
+    "kg:api": "cd services/kg-pipeline && poetry run serve-api",
+    "kg:lint": "cd services/kg-pipeline && poetry run ruff check src/",
+    "kg:format": "cd services/kg-pipeline && poetry run black src/",
+    "install:all": "npm run web:install && npm run kg:install",
+    "dev": "npm run web:dev"
   },
-  "dependencies": {
-    "next": "14.2.0",
-    "react": "^18.3.0",
-    "react-dom": "^18.3.0",
-    "aws-amplify": "^6.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "typescript": "^5",
-    "eslint": "^8",
-    "eslint-config-next": "14.2.0"
+  "workspaces": [
+    "web"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

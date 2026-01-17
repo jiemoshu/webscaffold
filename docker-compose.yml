@@ -1,0 +1,40 @@
+# Singapore Math Platform - Local Development Dependencies
+#
+# Usage:
+#   docker-compose up -d        # Start all services
+#   docker-compose down         # Stop all services
+#   docker-compose logs -f neo4j # View Neo4j logs
+#
+# Note: Using non-default ports to avoid conflicts with other projects
+
+services:
+  neo4j:
+    image: neo4j:5.26-community
+    container_name: singapore-math-neo4j
+    restart: unless-stopped
+    ports:
+      # HTTP Browser (default: 7474)
+      - "17474:7474"
+      # Bolt Protocol (default: 7687)
+      - "17687:7687"
+    environment:
+      - NEO4J_AUTH=neo4j/singapore_math_2024
+      - NEO4J_PLUGINS=["apoc"]
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*
+      - NEO4J_dbms_memory_heap_initial__size=512m
+      - NEO4J_dbms_memory_heap_max__size=1G
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7474"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+volumes:
+  neo4j_data:
+    name: singapore-math-neo4j-data
+  neo4j_logs:
+    name: singapore-math-neo4j-logs

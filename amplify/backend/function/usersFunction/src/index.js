@@ -9,6 +9,17 @@
  * 3. event.path 表示请求路径
  * 4. event.pathParameters 包含路径参数（如 /users/{id} 中的 id）
  * 5. event.body 包含请求体（POST/PUT 请求的数据）
+ *
+ * 用户数据模型 (支持 OAuth2):
+ * {
+ *   id: string (UUID, 主键)
+ *   providerUserId: string (OAuth Provider 用户唯一标识, GSI)
+ *   name: string
+ *   email: string
+ *   avatar?: string
+ *   createdAt: string (ISO timestamp)
+ *   updatedAt: string (ISO timestamp)
+ * }
  */
 
 const AWS = require('aws-sdk')
@@ -19,6 +30,9 @@ const dynamoDB = new AWS.DynamoDB.DocumentClient()
 
 // 从环境变量获取表名（Amplify 会自动设置）
 const TABLE_NAME = process.env.STORAGE_USERSTABLE_NAME || 'Users-dev'
+
+// GSI 名称 - 用于按 providerUserId 查询
+const PROVIDER_INDEX = 'providerUserId-index'
 
 /**
  * Lambda 主处理函数
@@ -64,6 +78,12 @@ exports.handler = async (event, context) => {
     if (method === 'POST' && path === '/users') {
       const body = JSON.parse(event.body || '{}')
       return await createUser(body, headers)
+    }
+
+    // GET /users/by-provider/{providerUserId} - 通过 OAuth Provider ID 获取用户
+    if (method === 'GET' && path.startsWith('/users/by-provider/')) {
+      const providerUserId = decodeURIComponent(path.replace('/users/by-provider/', ''))
+      return await getUserByProviderId(providerUserId, headers)
     }
 
     // GET /users/{id} - 获取单个用户
@@ -131,30 +151,45 @@ async function getAllUsers(headers) {
  * 创建新用户
  *
  * API: POST /users
- * 请求体: { name: string, email: string }
+ * 请求体: { providerUserId?: string, name: string, email: string, avatar?: string }
  * 返回：创建的用户对象
+ *
+ * 支持两种模式:
+ * 1. OAuth 用户: 提供 providerUserId
+ * 2. 传统用户: 仅提供 name 和 email (向后兼容)
  */
 async function createUser(body, headers) {
   console.log('执行: 创建新用户', body)
 
   // 验证输入
-  if (!body.name || !body.email) {
+  if (!body.name) {
     return {
       statusCode: 400,
       headers,
       body: JSON.stringify({
         error: '缺少必填字段',
-        message: '请提供 name 和 email'
+        message: '请提供 name'
       })
     }
   }
+
+  const now = new Date().toISOString()
 
   // 创建用户对象
   const user = {
     id: uuidv4(), // 生成唯一 ID
     name: body.name,
-    email: body.email,
-    createdAt: new Date().toISOString()
+    email: body.email || '',
+    createdAt: now,
+    updatedAt: now
+  }
+
+  // OAuth 用户字段
+  if (body.providerUserId) {
+    user.providerUserId = body.providerUserId
+  }
+  if (body.avatar) {
+    user.avatar = body.avatar
   }
 
   // 写入 DynamoDB
@@ -169,6 +204,81 @@ async function createUser(body, headers) {
     statusCode: 201,
     headers,
     body: JSON.stringify(user)
+  }
+}
+
+/**
+ * 通过 OAuth Provider ID 获取用户
+ *
+ * API: GET /users/by-provider/{providerUserId}
+ * 路径参数: providerUserId - OAuth Provider 用户唯一标识
+ * 返回：用户对象 或 404
+ */
+async function getUserByProviderId(providerUserId, headers) {
+  console.log('执行: 通过 Provider ID 获取用户', providerUserId)
+
+  if (!providerUserId) {
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({
+        error: '缺少参数',
+        message: '请提供 providerUserId'
+      })
+    }
+  }
+
+  // 使用 GSI 查询 (如果 GSI 不存在，回退到 scan)
+  try {
+    // 尝试使用 GSI
+    const queryParams = {
+      TableName: TABLE_NAME,
+      IndexName: PROVIDER_INDEX,
+      KeyConditionExpression: 'providerUserId = :pid',
+      ExpressionAttributeValues: {
+        ':pid': providerUserId
+      }
+    }
+
+    const result = await dynamoDB.query(queryParams).promise()
+
+    if (result.Items && result.Items.length > 0) {
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify(result.Items[0])
+      }
+    }
+  } catch (err) {
+    // GSI 可能不存在，回退到 scan
+    console.log('GSI query failed, falling back to scan:', err.message)
+
+    const scanParams = {
+      TableName: TABLE_NAME,
+      FilterExpression: 'providerUserId = :pid',
+      ExpressionAttributeValues: {
+        ':pid': providerUserId
+      }
+    }
+
+    const result = await dynamoDB.scan(scanParams).promise()
+
+    if (result.Items && result.Items.length > 0) {
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify(result.Items[0])
+      }
+    }
+  }
+
+  return {
+    statusCode: 404,
+    headers,
+    body: JSON.stringify({
+      error: '用户不存在',
+      message: `未找到 Provider ID 为 ${providerUserId} 的用户`
+    })
   }
 }
 
